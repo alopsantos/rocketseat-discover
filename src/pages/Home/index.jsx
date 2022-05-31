@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "../../components/Card";
 import "./styles.css";
 
 export function Home() {
   const [studentName, setStudentName] = useState();
   const [students, setStudents] = useState([]);
+  const [user, setUser] = useState({ name: "", avatar: "" });
 
   function handleAddStudent() {
     const newStudent = {
@@ -15,16 +16,29 @@ export function Home() {
         second: "2-digit",
       }),
     };
-
-    setStudents(prevState =>[...prevState, newStudent]);
+    setStudents((prevState) => [...prevState, newStudent]);
   }
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch("https://api.github.com/users/alopsantos");
+      const data = await response.json();
+
+      setUser({
+        name: data.name,
+        avatar: data.avatar_url,
+      });
+    }
+    fetchData()
+  }, []);
+
   return (
     <div className="container">
       <header>
         <h1>Lista de Presença</h1>
         <div>
-          <strong>Anderson</strong>
-          <img src="https://github.com/alopsantos.png" alt="Anderson Lopes" />
+          <strong>{user.name}</strong>
+          <img src={user.avatar} alt="Anderson Lopes" />
         </div>
       </header>
       <input
@@ -34,7 +48,9 @@ export function Home() {
         placeholder="Digite o nome..."
         onChange={(e) => setStudentName(e.target.value)}
       />
-      <button type="button" onClick={handleAddStudent}>Adicionar</button>
+      <button type="button" onClick={handleAddStudent}>
+        Adicionar
+      </button>
 
       {students.map((student) => (
         <Card key={student.time} name={student.name} time={student.time} />
